@@ -28,7 +28,8 @@ pmllib/
         README.md
 src/
   dotnet/
-    AvevaE3D.CustomTools.CopyCe/
+    AvevaE3D.CustomTools.sln
+    AvevaE3D.CustomTools/
       README.md
       *.csproj
       *.cs
@@ -71,6 +72,14 @@ For each published DLL release, include:
 
 ## COPYCE Direction
 
-The current `COPYCE` helper is implemented in PML. A future DLL-backed variant can be added in parallel as a new entrypoint, for example `copyCeNet.pmlfnc`, without removing the PML-only version.
+The current `COPYCE` helper is implemented in PML. A DLL-backed layer has started in `src/dotnet/AvevaE3D.CustomTools/` with `AvevaE3D.CustomTools.Copy.CopyTools`.
+
+The first PMLNet wrapper is:
+
+```text
+pmllib/mylib/design/copyfunc/copyCeNetBuildName.pmlfnc
+```
+
+It calls the C# naming logic only. A future entrypoint, for example `copyCeNet.pmlfnc`, can perform more of the actual copy workflow after undo/transaction behavior is confirmed in E3D 2.10.
 
 That keeps the simple public PML implementation available while allowing a richer C# implementation for advanced copy behavior.

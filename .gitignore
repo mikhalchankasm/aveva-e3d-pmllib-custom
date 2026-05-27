@@ -8,6 +8,9 @@
 # Generated packages
 dist/
 *.vsix
+bin/
+obj/
+*.pdb
 
 # Editor/system files
 .vscode/

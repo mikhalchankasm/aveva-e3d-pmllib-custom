@@ -121,6 +121,20 @@ LOWER       /lowercopy-pipename
 - `PIPEBRANCH` - специальный короткий режим для трубопроводов: `PIPE` получает метку `P-`, `BRAN` получает `B-`, остальные типы именуются как в `TYPEPREFIX`. Это уменьшает длину имени и оставляет понятную маркировку pipe/branch.
 - `LOWER` - приводит итоговое имя к нижнему регистру. Используется, если в проекте принята lowercase-схема именования или нужно убрать смешанный регистр из копий.
 
+## Экспериментальный PMLNet wrapper
+
+В репозитории начат параллельный C#-слой `AvevaE3D.CustomTools`. Первый wrapper только вызывает C#-логику построения имени и не выполняет копирование базы:
+
+```pml
+!name = !!copyCeNetBuildName(!!ce.flnn, !!ce.acttype, 'copyof', 1, 'DEFAULT')
+```
+
+Для работы wrapper рядом с PMLLIB должна быть доступна собранная DLL `AvevaE3D.CustomTools.dll`. Исходники находятся в:
+
+```text
+src/dotnet/AvevaE3D.CustomTools/
+```
+
 ## Примеры режимов
 
 ### DEFAULT
@@ -205,4 +219,5 @@ copyCeWithMode.pmlfnc             wrapper для режима именовани
 copyCeWithCopyofNames.pmlfnc      простая копия copyof
 copyCeWithPrefixRoot.pmlfnc       копия со своим префиксом
 copyCeWithPrefixRootMark.pmlfnc   копия со своим префиксом и MARKDB-текстом
+copyCeNetBuildName.pmlfnc         экспериментальный PMLNet wrapper для расчета имени
 ```

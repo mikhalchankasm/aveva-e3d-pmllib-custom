@@ -121,6 +121,20 @@ Mode purpose:
 - `PIPEBRANCH` - a shorter piping-focused mode: `PIPE` gets `P-`, `BRAN` gets `B-`, and all other types fall back to `TYPEPREFIX`. It keeps names shorter while still marking pipe and branch elements clearly.
 - `LOWER` - converts the generated name to lowercase. Use it when the project naming convention prefers lowercase names or when copied names should not keep mixed case.
 
+## Experimental PMLNet Wrapper
+
+The repository now has a parallel C# layer named `AvevaE3D.CustomTools`. The first wrapper only calls the C# name-building logic and does not copy database elements:
+
+```pml
+!name = !!copyCeNetBuildName(!!ce.flnn, !!ce.acttype, 'copyof', 1, 'DEFAULT')
+```
+
+To use the wrapper, the built `AvevaE3D.CustomTools.dll` must be available next to the PMLLIB/runtime setup. Source code lives in:
+
+```text
+src/dotnet/AvevaE3D.CustomTools/
+```
+
 ## Mode Examples
 
 ### DEFAULT
@@ -205,4 +219,5 @@ copyCeWithMode.pmlfnc             naming mode wrapper
 copyCeWithCopyofNames.pmlfnc      simple copyof copy
 copyCeWithPrefixRoot.pmlfnc       custom prefix copy
 copyCeWithPrefixRootMark.pmlfnc   custom prefix copy with MARKDB text
+copyCeNetBuildName.pmlfnc         experimental PMLNet wrapper for name calculation
 ```

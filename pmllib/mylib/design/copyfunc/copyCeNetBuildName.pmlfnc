@@ -1,0 +1,14 @@
+define function !!copyCeNetBuildName(!sourceName is STRING, !elementType is STRING, !prefixRoot is STRING, !copyIndex is REAL, !nameMode is STRING) is STRING $* RU/EN: PMLNet naming wrapper
+
+import 'AvevaE3D.CustomTools'
+handle ANY
+    write 'AvevaE3D.CustomTools import failed'
+    return ''
+endhandle
+
+using namespace 'AvevaE3D.CustomTools.Copy'
+
+!tools = object CopyTools()
+return !tools.BuildName(!sourceName, !elementType, !prefixRoot, !copyIndex, !nameMode)
+
+endfunction

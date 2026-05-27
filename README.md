@@ -27,7 +27,8 @@ scripts/
   install-local.ps1
 src/
   dotnet/
-    <tool-project>/
+    AvevaE3D.CustomTools.sln
+    AvevaE3D.CustomTools/
 ```
 
 ## Install
@@ -57,6 +58,12 @@ Compiled `.dll` files are intentionally ignored by git. Publish them through Git
 
 See [docs/dotnet-tools.md](docs/dotnet-tools.md) for the repository rules for DLL-backed helpers.
 
+Current solution:
+
+```text
+src/dotnet/AvevaE3D.CustomTools.sln
+```
+
 ## Function Catalog
 
 ### COPYCE
@@ -67,6 +74,7 @@ Files:
 
 ```text
 pmllib/mylib/design/copyfunc/
+src/dotnet/AvevaE3D.CustomTools/
 ```
 
 Documentation:

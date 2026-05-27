@@ -13,4 +13,11 @@ src/dotnet/<tool-project>/
   *.cs
 ```
 
+Current solution:
+
+```text
+src/dotnet/AvevaE3D.CustomTools.sln
+src/dotnet/AvevaE3D.CustomTools/
+```
+
 See [../../docs/dotnet-tools.md](../../docs/dotnet-tools.md) for the repository rules.
