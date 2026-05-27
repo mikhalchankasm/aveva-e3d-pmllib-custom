@@ -22,6 +22,26 @@ Override it during build if needed:
 dotnet msbuild src\dotnet\AvevaE3D.CustomTools.sln /p:E3DInstallDir="C:\Program Files (x86)\AVEVA\Everything3D2.10" /p:Configuration=Release /p:Platform=x86
 ```
 
+## Release Package
+
+GitHub-hosted runners do not have AVEVA `PMLNet.dll`, so this DLL is built locally or on a private self-hosted runner with E3D installed.
+
+Create a local zip package:
+
+```powershell
+.\scripts\publish-dotnet-release.ps1 -Version "0.1.0"
+```
+
+Create the package and upload it to GitHub Releases:
+
+```powershell
+.\scripts\publish-dotnet-release.ps1 -Version "0.1.0" -Upload
+```
+
+Current downloadable package:
+
+[AvevaE3D.CustomTools 0.1.0](https://github.com/mikhalchankasm/aveva-e3d-pmllib-custom/releases/tag/dotnet-tools-v0.1.0)
+
 ## PMLNet Class
 
 ```text

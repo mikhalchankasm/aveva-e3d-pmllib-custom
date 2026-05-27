@@ -64,6 +64,16 @@ Current solution:
 src/dotnet/AvevaE3D.CustomTools.sln
 ```
 
+Local release package:
+
+```powershell
+.\scripts\publish-dotnet-release.ps1 -Version "0.1.0"
+```
+
+Current downloadable DLL package:
+
+[AvevaE3D.CustomTools 0.1.0](https://github.com/mikhalchankasm/aveva-e3d-pmllib-custom/releases/tag/dotnet-tools-v0.1.0)
+
 ## Function Catalog
 
 ### COPYCE

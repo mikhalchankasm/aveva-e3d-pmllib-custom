@@ -70,6 +70,41 @@ For each published DLL release, include:
 - checksum;
 - short changelog.
 
+## Build And Publish
+
+GitHub does not build this DLL automatically on the public hosted runners. The project references `PMLNet.dll` from the local E3D installation, and that AVEVA binary is not committed to this repository.
+
+Use one of these release paths:
+
+- build locally on a machine with AVEVA E3D 2.10 installed, then upload the package to GitHub Releases;
+- use a private self-hosted Windows GitHub Actions runner that has E3D installed;
+- keep source-only distribution and let users build locally.
+
+Local package build:
+
+```powershell
+.\scripts\publish-dotnet-release.ps1 -Version "0.1.0"
+```
+
+Build and upload to GitHub Releases:
+
+```powershell
+.\scripts\publish-dotnet-release.ps1 -Version "0.1.0" -Upload
+```
+
+The script creates:
+
+```text
+dist/dotnet/AvevaE3D.CustomTools-<version>-e3d210-x86.zip
+dist/dotnet/AvevaE3D.CustomTools-<version>-e3d210-x86.zip.sha256
+```
+
+The zip contains only the user-authored `AvevaE3D.CustomTools.dll` and a small README. It does not include AVEVA DLLs.
+
+Current public package:
+
+[AvevaE3D.CustomTools 0.1.0](https://github.com/mikhalchankasm/aveva-e3d-pmllib-custom/releases/tag/dotnet-tools-v0.1.0)
+
 ## COPYCE Direction
 
 The current `COPYCE` helper is implemented in PML. A DLL-backed layer has started in `src/dotnet/AvevaE3D.CustomTools/` with `AvevaE3D.CustomTools.Copy.CopyTools`.

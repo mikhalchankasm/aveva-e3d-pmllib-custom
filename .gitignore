@@ -14,6 +14,8 @@ obj/
 
 # Editor/system files
 .vscode/
+.vs/
+.cr/
 .idea/
 Thumbs.db
 Desktop.ini
