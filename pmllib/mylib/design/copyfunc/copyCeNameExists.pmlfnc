@@ -1,0 +1,6 @@
+define function !!copyCeNameExists(!name is STRING) is BOOLEAN $* RU/EN: wrapper
+
+!copy = object COPYCE()
+return !copy.nameExists(!name)
+
+endfunction

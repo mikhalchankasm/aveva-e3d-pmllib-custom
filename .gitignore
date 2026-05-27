@@ -1,0 +1,23 @@
+# Local E3D/PDMS artifacts
+*.log
+*.tmp
+*.bak
+*.old
+*.zip
+
+# Generated packages
+dist/
+*.vsix
+
+# Editor/system files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# Do not commit copied vendor libraries or project databases.
+vendor/
+AVEVA/
+*.dll
+*.mdb
+*.db

@@ -1,0 +1,6 @@
+define function !!copyCeCreateRawCopy(!source is DBREF, !targetOwner is DBREF) is DBREF $* RU/EN: wrapper
+
+!copy = object COPYCE(!source, !targetOwner)
+return !copy.createRawCopy()
+
+endfunction

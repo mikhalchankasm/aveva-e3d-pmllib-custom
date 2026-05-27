@@ -1,0 +1,7 @@
+define function !!copyCeFindFreePrefix(!sourceElements is ARRAY, !prefixRoot is STRING) is STRING $* RU/EN: wrapper
+
+!copy = object COPYCE()
+!copy.prefixRoot = !prefixRoot
+return !copy.findFreePrefix(!sourceElements)
+
+endfunction

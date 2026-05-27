@@ -1,0 +1,7 @@
+define function !!copyCeIndexedPrefix(!prefixRoot is STRING, !copyIndex is REAL) is STRING $* RU/EN: wrapper
+
+!copy = object COPYCE()
+!copy.prefixRoot = !prefixRoot
+return !copy.indexedPrefix(!copyIndex)
+
+endfunction

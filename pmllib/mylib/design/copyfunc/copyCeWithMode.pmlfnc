@@ -1,0 +1,6 @@
+define function !!copyCeWithMode(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING, !nameMode is STRING, !markText is STRING) is DBREF $* RU/EN: mode wrapper
+
+!copy = object COPYCE(!source, !targetOwner, !prefixRoot, !markText, !nameMode)
+return !copy.run()
+
+endfunction

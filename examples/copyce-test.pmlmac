@@ -1,0 +1,9 @@
+$* Run on a safe test CE.
+
+!created = !!copyCeTestCurrent()
+
+$P COPYCE test created:
+q var !created
+
+$* To undo all four test copies:
+$* UNDODB 4

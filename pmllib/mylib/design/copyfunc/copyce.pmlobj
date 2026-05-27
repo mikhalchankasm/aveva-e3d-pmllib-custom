@@ -1,0 +1,287 @@
+define object COPYCE
+
+    member .source is DBREF
+    member .targetOwner is DBREF
+    member .prefixRoot is STRING
+    member .nameMode is STRING
+    member .markText is STRING
+    member .copyRoot is DBREF
+    member .lastPrefix is STRING
+    member .lastRenamed is REAL
+
+endobject
+
+define method .copyCe()
+
+    !this.prefixRoot  = 'copyof'
+    !this.nameMode    = 'DEFAULT'
+    !this.markText    = 'Copy CE with custom names'
+    !this.lastPrefix  = ''
+    !this.lastRenamed = 0
+
+endmethod
+
+define method .copyCe(!source is DBREF, !targetOwner is DBREF)
+
+    !this.copyCe()
+    !this.source      = !source
+    !this.targetOwner = !targetOwner
+
+endmethod
+
+define method .copyCe(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING)
+
+    !this.copyCe(!source, !targetOwner)
+    !this.prefixRoot = !prefixRoot
+
+endmethod
+
+define method .copyCe(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING, !markText is STRING)
+
+    !this.copyCe(!source, !targetOwner, !prefixRoot)
+    !this.markText = !markText
+
+endmethod
+
+define method .copyCe(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING, !markText is STRING, !nameMode is STRING)
+
+    !this.copyCe(!source, !targetOwner, !prefixRoot, !markText)
+    !this.nameMode = !nameMode
+
+endmethod
+
+define method .indexedPrefix(!copyIndex is REAL) is STRING
+
+    if !copyIndex.eq(1) then
+        return !this.prefixRoot & '-'
+    else
+        return !this.prefixRoot & '-($!copyIndex)-'
+    endif
+
+endmethod
+
+define method .copyOfPrefix(!copyIndex is REAL) is STRING
+
+    !oldPrefixRoot   = !this.prefixRoot
+    !this.prefixRoot = 'copyof'
+    !prefix          = !this.indexedPrefix(!copyIndex)
+    !this.prefixRoot = !oldPrefixRoot
+    return !prefix
+
+endmethod
+
+define method .baseName(!sourceElement is DBREF) is STRING
+
+    !baseName = !sourceElement.flnn $* RU/EN: no leading slash
+
+    if !baseName.substring(1,7).eq('copyof-') then
+        !baseName = !baseName.substring(8) $* RU/EN: strip copyof-
+    elseif !baseName.matchwild('copyof-(*)-*') then
+        !baseName = !baseName.after(')-') $* RU/EN: strip copyof-(n)-
+    endif
+
+    return !baseName
+
+endmethod
+
+define method .defaultName(!sourceElement is DBREF, !prefix is STRING) is STRING
+
+    return '/' & !prefix & !this.baseName(!sourceElement) $* RU/EN: full name
+
+endmethod
+
+define method .typePrefixName(!sourceElement is DBREF, !prefix is STRING) is STRING
+
+    return '/' & !prefix & !sourceElement.acttype & '-' & !this.baseName(!sourceElement) $* RU/EN: TYPE-base
+
+endmethod
+
+define method .pipeBranchName(!sourceElement is DBREF, !prefix is STRING) is STRING
+
+    if !sourceElement.acttype.eq('PIPE') then
+        return '/' & !prefix & 'P-' & !this.baseName(!sourceElement) $* RU/EN: pipe short tag
+    elseif !sourceElement.acttype.eq('BRAN') then
+        return '/' & !prefix & 'B-' & !this.baseName(!sourceElement) $* RU/EN: branch short tag
+    else
+        return !this.typePrefixName(!sourceElement, !prefix) $* RU/EN: fallback type tag
+    endif
+
+endmethod
+
+define method .lowerName(!sourceElement is DBREF, !prefix is STRING) is STRING
+
+    !baseName    = !this.baseName(!sourceElement)
+    !lowerPrefix = !prefix.lowcase()
+    !lowerBase   = !baseName.lowcase()
+    return '/' & !lowerPrefix & !lowerBase $* RU/EN: lowercase name
+
+endmethod
+
+define method .customName(!sourceElement is DBREF, !prefix is STRING) is STRING
+
+    !mode = !this.nameMode.upcase()
+
+    if !mode.eq('TYPEPREFIX') then
+        return !this.typePrefixName(!sourceElement, !prefix) $* RU/EN: prefix TYPE-
+    elseif !mode.eq('PIPEBRANCH') then
+        return !this.pipeBranchName(!sourceElement, !prefix) $* RU/EN: P-/B- tags
+    elseif !mode.eq('LOWER') then
+        return !this.lowerName(!sourceElement, !prefix) $* RU/EN: lowercase
+    else
+        return !this.defaultName(!sourceElement, !prefix) $* RU/EN: default
+    endif
+
+endmethod
+
+define method .nameExists(!name is STRING) is BOOLEAN
+
+    !exists = TRUE
+    !unused = object DBREF(!name) $* RU/EN: succeeds if exists
+    handle ANY
+        !exists = FALSE $* RU/EN: name is free
+    endhandle
+
+    return !exists
+
+endmethod
+
+define method .collectTree(!root is DBREF) is ARRAY
+
+    !collection = object COLLECTION()
+    !collection.scope(!root)
+    return !collection.results()
+
+endmethod
+
+define method .findFreePrefix(!sourceElements is ARRAY) is STRING
+
+    do !n from 1 to 100
+
+        !tryPrefix = !this.indexedPrefix(!n)
+        !free      = TRUE
+
+        do !i index !sourceElements
+            !src = !sourceElements[!i]
+            skip if !src.isNamed.not()
+
+            !newName = !this.customName(!src, !tryPrefix) $* RU/EN: same rule as rename
+
+            if !this.nameExists(!newName) then
+                !free = FALSE
+                break
+            endif
+        enddo
+
+        if !free then
+            return !tryPrefix
+        endif
+
+    enddo
+
+    return ''
+
+endmethod
+
+define method .createRawCopy() is DBREF
+
+    !oldCe = !!ce $* RU/EN: save CE
+    !!ce   = !this.targetOwner
+
+    !sourceType = !this.source.acttype
+    !sourceName = !this.source.flnm
+
+    new $!sourceType copy $!sourceName
+    !copyRoot = !!ce
+
+    !!ce = !oldCe $* RU/EN: restore CE
+    return !copyRoot
+
+endmethod
+
+define method .renameTree(!sourceElements is ARRAY, !copyRoot is DBREF, !prefix is STRING) is REAL
+
+    var !copyElements collect all for $!copyRoot
+
+    !max = !sourceElements.size()
+    if !copyElements.size().lt(!max) then
+        !max = !copyElements.size()
+    endif
+
+    !renamed = 0
+
+    do !i from 1 to !max
+        !src = !sourceElements[!i]
+        skip if !src.isNamed.not()
+
+        !newName                       = !this.customName(!src, !prefix)
+        !copyElements[!i].dbref().name = !newName
+
+        handle ANY
+            !msg = 'Rename failed: ' & !newName & ' : ' & !!error.text
+            write '$!msg'
+        elsehandle NONE
+            !renamed = !renamed + 1
+        endhandle
+    enddo
+
+    return !renamed
+
+endmethod
+
+define method .run() is DBREF
+
+    !sourceElements = !this.collectTree(!this.source)
+    !prefix         = !this.findFreePrefix(!sourceElements)
+
+    if !prefix.eq('') then
+        write 'No free copy prefix found'
+        return object DBREF()
+    endif
+
+    !markText = !this.markText
+    markdb '$!markText' $* RU/EN: undo mark
+    !this.copyRoot    = !this.createRawCopy()
+    !this.lastRenamed = !this.renameTree(!sourceElements, !this.copyRoot, !prefix)
+    !this.lastPrefix  = !prefix
+
+    return !this.copyRoot
+
+endmethod
+
+define method .run(!source is DBREF, !targetOwner is DBREF) is DBREF
+
+    !this.source      = !source
+    !this.targetOwner = !targetOwner
+    return !this.run()
+
+endmethod
+
+define method .run(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING) is DBREF
+
+    !this.source      = !source
+    !this.targetOwner = !targetOwner
+    !this.prefixRoot  = !prefixRoot
+    return !this.run()
+
+endmethod
+
+define method .run(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING, !markText is STRING) is DBREF
+
+    !this.source      = !source
+    !this.targetOwner = !targetOwner
+    !this.prefixRoot  = !prefixRoot
+    !this.markText    = !markText
+    return !this.run()
+
+endmethod
+
+define method .run(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING, !markText is STRING, !nameMode is STRING) is DBREF
+
+    !this.source      = !source
+    !this.targetOwner = !targetOwner
+    !this.prefixRoot  = !prefixRoot
+    !this.markText    = !markText
+    !this.nameMode    = !nameMode
+    return !this.run()
+
+endmethod

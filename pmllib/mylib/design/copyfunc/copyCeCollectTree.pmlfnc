@@ -1,0 +1,6 @@
+define function !!copyCeCollectTree(!root is DBREF) is ARRAY $* RU/EN: wrapper
+
+!copy = object COPYCE()
+return !copy.collectTree(!root)
+
+endfunction

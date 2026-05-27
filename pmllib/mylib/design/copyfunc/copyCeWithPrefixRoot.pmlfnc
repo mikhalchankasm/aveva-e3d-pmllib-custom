@@ -1,0 +1,6 @@
+define function !!copyCeWithPrefixRoot(!source is DBREF, !targetOwner is DBREF, !prefixRoot is STRING) is DBREF $* RU/EN: wrapper
+
+!copy = object COPYCE(!source, !targetOwner, !prefixRoot)
+return !copy.run()
+
+endfunction

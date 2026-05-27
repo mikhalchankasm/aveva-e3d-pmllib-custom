@@ -1,0 +1,6 @@
+define function !!copyCeWithCopyofNames(!source is DBREF, !targetOwner is DBREF) is DBREF $* RU/EN: wrapper
+
+!copy = object COPYCE(!source, !targetOwner)
+return !copy.run()
+
+endfunction

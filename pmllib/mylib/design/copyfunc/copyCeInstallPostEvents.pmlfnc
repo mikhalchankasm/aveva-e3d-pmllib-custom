@@ -1,0 +1,13 @@
+define function !!copyCeInstallPostEvents() is BOOLEAN $* RU/EN: install undo callbacks
+
+if defined(!!postEvents) then
+    write '!!postEvents already exists'
+    return FALSE
+endif
+
+!events = object COPYCEPOSTEVENTS()
+!events.globalInstance()
+
+return TRUE
+
+endfunction

@@ -1,0 +1,32 @@
+define function !!copyCeTestCurrent() is ARRAY $* RU/EN: test current CE
+
+!source = !!ce
+!targetOwner = !source.owner
+!created = ARRAY()
+
+!msg = 'COPYCE test source: ' & !source.flnm
+write '$!msg'
+
+!copy = object COPYCE(!source, !targetOwner, 'copyof', 'Test COPYCE DEFAULT', 'DEFAULT')
+!created.append(!copy.run())
+!msg = 'COPYCE DEFAULT: ' & !copy.copyRoot.flnm & ' prefix=' & !copy.lastPrefix & ' renamed=' & !copy.lastRenamed.string()
+write '$!msg'
+
+!copy = object COPYCE(!source, !targetOwner, 'typecopy', 'Test COPYCE TYPEPREFIX', 'TYPEPREFIX')
+!created.append(!copy.run())
+!msg = 'COPYCE TYPEPREFIX: ' & !copy.copyRoot.flnm & ' prefix=' & !copy.lastPrefix & ' renamed=' & !copy.lastRenamed.string()
+write '$!msg'
+
+!copy = object COPYCE(!source, !targetOwner, 'pbcopy', 'Test COPYCE PIPEBRANCH', 'PIPEBRANCH')
+!created.append(!copy.run())
+!msg = 'COPYCE PIPEBRANCH: ' & !copy.copyRoot.flnm & ' prefix=' & !copy.lastPrefix & ' renamed=' & !copy.lastRenamed.string()
+write '$!msg'
+
+!copy = object COPYCE(!source, !targetOwner, 'lowercopy', 'Test COPYCE LOWER', 'LOWER')
+!created.append(!copy.run())
+!msg = 'COPYCE LOWER: ' & !copy.copyRoot.flnm & ' prefix=' & !copy.lastPrefix & ' renamed=' & !copy.lastRenamed.string()
+write '$!msg'
+
+return !created
+
+endfunction

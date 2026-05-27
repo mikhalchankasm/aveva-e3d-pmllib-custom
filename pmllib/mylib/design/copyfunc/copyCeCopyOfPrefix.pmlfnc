@@ -1,0 +1,6 @@
+define function !!copyCeCopyOfPrefix(!copyIndex is REAL) is STRING $* RU/EN: wrapper
+
+!copy = object COPYCE()
+return !copy.copyOfPrefix(!copyIndex)
+
+endfunction

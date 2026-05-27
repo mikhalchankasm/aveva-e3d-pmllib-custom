@@ -1,0 +1,11 @@
+define function !!copyCePostEventsEnabled(!enabled is BOOLEAN) is BOOLEAN $* RU/EN: toggle callbacks
+
+if undefined(!!postEvents) then
+    write '!!postEvents is not installed'
+    return FALSE
+endif
+
+!!postEvents.enabled = !enabled
+return TRUE
+
+endfunction

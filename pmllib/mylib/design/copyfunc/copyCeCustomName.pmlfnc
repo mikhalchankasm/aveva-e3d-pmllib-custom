@@ -1,0 +1,6 @@
+define function !!copyCeCustomName(!sourceElement is DBREF, !prefix is STRING) is STRING $* RU/EN: wrapper
+
+!copy = object COPYCE()
+return !copy.customName(!sourceElement, !prefix)
+
+endfunction

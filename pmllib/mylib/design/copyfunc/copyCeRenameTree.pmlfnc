@@ -1,0 +1,6 @@
+define function !!copyCeRenameTree(!sourceElements is ARRAY, !copyRoot is DBREF, !prefix is STRING) is REAL $* RU/EN: wrapper
+
+!copy = object COPYCE()
+return !copy.renameTree(!sourceElements, !copyRoot, !prefix)
+
+endfunction

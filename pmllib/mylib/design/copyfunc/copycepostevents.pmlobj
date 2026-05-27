@@ -1,0 +1,63 @@
+define object COPYCEPOSTEVENTS
+
+member .enabled is BOOLEAN
+member .events is ARRAY
+
+endobject
+
+define method .copyCePostEvents()
+
+!this.enabled = TRUE
+!this.events = ARRAY()
+
+endmethod
+
+define method .globalInstance()
+
+!!postEvents = !this $* RU/EN: required global name
+
+endmethod
+
+define method .record(!eventType is STRING, !markText is STRING)
+
+skip if !this.enabled.not()
+
+!row = ARRAY()
+!row[1] = !eventType
+!row[2] = !markText
+!this.events.append(!row)
+
+!msg = 'PostEvents ' & !eventType & ': ' & !markText $* RU/EN: temp trace
+write '$!msg'
+
+endmethod
+
+define method .postMark(!markText is STRING)
+
+!this.record('MARK', !markText)
+
+endmethod
+
+define method .postUndo(!markText is STRING)
+
+!this.record('UNDO', !markText)
+
+endmethod
+
+define method .postRedo(!markText is STRING)
+
+!this.record('REDO', !markText)
+
+endmethod
+
+define method .postClearMark()
+
+!this.record('CLEAR_MARK', '')
+
+endmethod
+
+define method .postClearAll()
+
+!this.record('CLEAR_ALL', '')
+
+endmethod
