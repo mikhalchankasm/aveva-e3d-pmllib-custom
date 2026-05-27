@@ -70,6 +70,12 @@ define method .copyOfPrefix(!copyIndex is REAL) is STRING
 
 endmethod
 
+define method .maxFullNameLength() is REAL
+
+    return 50
+
+endmethod
+
 define method .baseName(!sourceElement is DBREF) is STRING
 
     !baseName = !sourceElement.flnn $* RU/EN: no leading slash
@@ -84,24 +90,41 @@ define method .baseName(!sourceElement is DBREF) is STRING
 
 endmethod
 
+define method .limitedName(!head is STRING, !baseName is STRING) is STRING
+
+    !maxBaseLength = !this.maxFullNameLength() - 1 - !head.length()
+
+    if !maxBaseLength.lt(1) then
+        return ''
+    endif
+
+    if !baseName.length().gt(!maxBaseLength) then
+        !baseName = !baseName.substring(1, !maxBaseLength)
+    endif
+
+    return '/' & !head & !baseName
+
+endmethod
+
 define method .defaultName(!sourceElement is DBREF, !prefix is STRING) is STRING
 
-    return '/' & !prefix & !this.baseName(!sourceElement) $* RU/EN: full name
+    return !this.limitedName(!prefix, !this.baseName(!sourceElement)) $* RU/EN: full name
 
 endmethod
 
 define method .typePrefixName(!sourceElement is DBREF, !prefix is STRING) is STRING
 
-    return '/' & !prefix & !sourceElement.acttype & '-' & !this.baseName(!sourceElement) $* RU/EN: TYPE-base
+    !head = !prefix & !sourceElement.acttype & '-'
+    return !this.limitedName(!head, !this.baseName(!sourceElement)) $* RU/EN: TYPE-base
 
 endmethod
 
 define method .pipeBranchName(!sourceElement is DBREF, !prefix is STRING) is STRING
 
     if !sourceElement.acttype.eq('PIPE') then
-        return '/' & !prefix & 'P-' & !this.baseName(!sourceElement) $* RU/EN: pipe short tag
+        return !this.limitedName(!prefix & 'P-', !this.baseName(!sourceElement)) $* RU/EN: pipe short tag
     elseif !sourceElement.acttype.eq('BRAN') then
-        return '/' & !prefix & 'B-' & !this.baseName(!sourceElement) $* RU/EN: branch short tag
+        return !this.limitedName(!prefix & 'B-', !this.baseName(!sourceElement)) $* RU/EN: branch short tag
     else
         return !this.typePrefixName(!sourceElement, !prefix) $* RU/EN: fallback type tag
     endif
@@ -113,7 +136,7 @@ define method .lowerName(!sourceElement is DBREF, !prefix is STRING) is STRING
     !baseName    = !this.baseName(!sourceElement)
     !lowerPrefix = !prefix.lowcase()
     !lowerBase   = !baseName.lowcase()
-    return '/' & !lowerPrefix & !lowerBase $* RU/EN: lowercase name
+    return !this.limitedName(!lowerPrefix, !lowerBase) $* RU/EN: lowercase name
 
 endmethod
 
@@ -153,12 +176,25 @@ define method .collectTree(!root is DBREF) is ARRAY
 
 endmethod
 
+define method .isDuplicateCandidate(!candidateNames is ARRAY, !newName is STRING) is BOOLEAN
+
+    do !i index !candidateNames
+        if !candidateNames[!i].eq(!newName) then
+            return TRUE
+        endif
+    enddo
+
+    return FALSE
+
+endmethod
+
 define method .findFreePrefix(!sourceElements is ARRAY) is STRING
 
     do !n from 1 to 100
 
         !tryPrefix = !this.indexedPrefix(!n)
         !free      = TRUE
+        !candidateNames = ARRAY()
 
         do !i index !sourceElements
             !src = !sourceElements[!i]
@@ -166,10 +202,18 @@ define method .findFreePrefix(!sourceElements is ARRAY) is STRING
 
             !newName = !this.customName(!src, !tryPrefix) $* RU/EN: same rule as rename
 
-            if !this.nameExists(!newName) then
+            if !newName.eq('') then
+                !free = FALSE
+                break
+            elseif !this.isDuplicateCandidate(!candidateNames, !newName) then
+                !free = FALSE
+                break
+            elseif !this.nameExists(!newName) then
                 !free = FALSE
                 break
             endif
+
+            !candidateNames.append(!newName)
         enddo
 
         if !free then
@@ -214,6 +258,11 @@ define method .renameTree(!sourceElements is ARRAY, !copyRoot is DBREF, !prefix 
         skip if !src.isNamed.not()
 
         !newName                       = !this.customName(!src, !prefix)
+        if !newName.eq('') then
+            !msg = 'Rename skipped: generated name is empty, prefix is too long'
+            write '$!msg'
+            skip
+        endif
         !copyElements[!i].dbref().name = !newName
 
         handle ANY

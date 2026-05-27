@@ -1,68 +1,80 @@
 # AVEVA E3D Custom PMLLIB
 
-Custom PML helpers for AVEVA E3D / PDMS-style PML automation.
+Public repository for user-authored PML helpers, objects, wrappers, examples, and notes for AVEVA E3D / PDMS-style automation.
 
-This repository is not affiliated with, endorsed by, or supported by AVEVA.
-It contains only user-authored PML files and examples. Do not commit AVEVA
-standard PMLLIB files, binaries, project databases, or licensed content.
+The goal is to keep reusable custom functions in one predictable structure so they can be installed into a local `PMLLIB`, reviewed, tested, and reused across projects. This repository is expected to grow: each function or feature should live in its own folder with its own short documentation and examples.
 
-## Contents
+This repository is not affiliated with, endorsed by, or supported by AVEVA. It contains only user-authored PML files and examples. Do not commit AVEVA standard PMLLIB files, binaries, project databases, or licensed content.
+
+## Repository Layout
 
 ```text
 pmllib/
   mylib/
     design/
-      copyfunc/
-        copyce.pmlobj
-        copycepostevents.pmlobj
-        copyCe*.pmlfnc
+      <module>/
+        *.pmlobj
+        *.pmlfnc
+        README.md
 docs/
   install.md
-  copyce.md
 examples/
-  copyce-test.pmlmac
+  *.pmlmac
 scripts/
   install-local.ps1
 ```
 
-## Quick Start
+## Install
 
-Install into a local E3D PMLLIB:
+Install the repository `pmllib` content into a local E3D PMLLIB path:
 
 ```powershell
 .\scripts\install-local.ps1 -E3DVersion "Everything3D2.10"
 ```
 
-Then in E3D, run on a safe test element:
+See [docs/install.md](docs/install.md) for installation notes.
 
-```pml
-!created = !!copyCeTestCurrent()
-```
+## Function Catalog
 
-Single copy:
+### COPYCE
 
-```pml
-!copy = object COPYCE(!!ce, !!ce.owner, 'copyof', 'Copy CE', 'DEFAULT')
-!newCopy = !copy.run()
-```
+Human-controlled database element copy helper. It creates a copy, applies configurable naming rules, keeps copied names within the E3D name-length limit, and creates a `MARKDB` undo mark.
 
-## Naming Modes
+Files:
 
 ```text
-DEFAULT     /copyof-OriginalName
-TYPEPREFIX  /typecopy-PIPE-OriginalName
-PIPEBRANCH  /pbcopy-P-OriginalName or /pbcopy-B-OriginalName
-LOWER       /lowercopy-originalname
+pmllib/mylib/design/copyfunc/
 ```
 
-See [docs/copyce.md](docs/copyce.md) for object methods, wrappers, and a flow diagram.
+Documentation:
+
+- [Russian README](pmllib/mylib/design/copyfunc/README.md)
+- [English README](pmllib/mylib/design/copyfunc/README.en.md)
+- [Technical notes](docs/copyce.md)
+
+Quick example:
+
+```pml
+!newCopy = !!copyCeWithCopyofNames(!!ce, !!ce.owner)
+```
+
+## Adding New Functions
+
+For each new helper, prefer this pattern:
+
+- Put the implementation under `pmllib/mylib/design/<module>/`.
+- Add a local `README.md` near the PML files.
+- Add a small safe example under `examples/` when possible.
+- Document expected inputs, outputs, side effects, and undo behavior.
+- Keep generated names, database writes, and project-specific assumptions explicit.
 
 ## Safety
 
 - Test in a disposable project or writable sandbox first.
-- Each copy operation creates a `MARKDB` undo mark.
-- Use `UNDODB` or `UNDODB n` to revert test runs.
-- Review naming rules in `copyce.pmlobj` before production use.
+- Review database write operations before using a helper in production.
+- Prefer helpers that create a `MARKDB` undo mark for destructive or bulk actions.
+- Use `UNDODB` or `UNDODB n` to revert test runs where supported.
+- Avoid committing project databases, generated binaries, licensed AVEVA files, or customer data.
 
 ## License
 

@@ -1,37 +1,133 @@
-# COPYCE test and usage notes
+# COPYCE
 
-Temporary PML copy helper location:
+Русская версия | [English version](README.en.md)
 
-`C:\Program Files (x86)\AVEVA\Everything3D2.10\PMLLIB\mylib\design\copyfunc`
+`COPYCE` - это PML helper для копирования текущего элемента базы данных с последующим переименованием скопированных именованных элементов.
 
-## Main object
+Идея простая: обычная команда `NEW ... COPY ...` делает техническую копию, но имена внутри дерева часто остаются неудобными для дальнейшей работы. Эта функция делает копию "человеческими руками": создает копию, подбирает свободный префикс, переименовывает корень и вложенные именованные элементы, а также создает `MARKDB`, чтобы операцию можно было откатить через `UNDODB`.
 
-```pml
-!copy = object COPYCE(!!ce, !!ce.owner)
-!newCopy = !copy.run()
+## Где лежит
+
+```text
+pmllib\mylib\design\copyfunc
 ```
 
-This copies current `CE` under its owner and renames named elements with default mode:
+Основной объект:
+
+```text
+copyce.pmlobj
+```
+
+## Простая копия
+
+Если нужна обычная копия текущего `CE` под тем же владельцем, используйте короткую функцию:
+
+```pml
+!newCopy = !!copyCeWithCopyofNames(!!ce, !!ce.owner)
+```
+
+Она создаст копию и переименует элементы в стиле:
 
 ```text
 /copyof-OriginalName
 /copyof-(2)-OriginalName
 ```
 
-## Naming modes
+Если копируется уже созданная копия, старый `copyof-` или `copyof-(n)-` из базового имени убирается. Поэтому повторные копии не превращаются в `copyof-copyof-...`; вместо этого меняется индекс:
+
+```text
+/copyof-OriginalName
+/copyof-(2)-OriginalName
+/copyof-(10)-OriginalName
+```
+
+Второй вариант - напрямую через объект:
+
+```pml
+!copy = object COPYCE(!!ce, !!ce.owner)
+!newCopy = !copy.run()
+```
+
+После запуска можно посмотреть результат:
+
+```pml
+q var !copy.copyRoot
+q var !copy.lastPrefix
+q var !copy.lastRenamed
+```
+
+## Копия со своим префиксом
+
+Если нужно не `copyof`, а свой префикс, например `clone`, используйте:
+
+```pml
+!newCopy = !!copyCeWithPrefixRoot(!!ce, !!ce.owner, 'clone')
+```
+
+Примеры имен:
+
+```text
+/clone-PipeName
+/clone-BranchName
+/clone-(2)-PipeName
+```
+
+Если нужно задать текст undo-метки:
+
+```pml
+!newCopy = !!copyCeWithPrefixRootMark(!!ce, !!ce.owner, 'clone', 'Clone current CE')
+```
+
+## Ограничение длины имени
+
+Полное имя элемента, включая `/`, ограничено 50 символами. `COPYCE` строит имя с учетом текущего префикса и индекса копии. Если имя получается слишком длинным, обрезается базовая часть имени, а префикс и индекс сохраняются.
+
+Например, для десятой копии место резервируется под `copyof-(10)-`, и уже после этого берется доступная часть исходного имени:
+
+```text
+/copyof-(10)-VeryLongOriginalElementName...
+```
+
+Если префикс сам по себе слишком длинный и под базовое имя не остается ни одного символа, такой вариант считается недоступным и копия не запускается с этим префиксом.
+
+## Сложная или кастомная копия
+
+Если нужна более сложная логика именования, создавайте объект `COPYCE` напрямую и задавайте режим:
+
+```pml
+!copy = object COPYCE(!!ce, !!ce.owner, 'typecopy', 'Copy TYPEPREFIX', 'TYPEPREFIX')
+!newCopy = !copy.run()
+```
+
+Или используйте wrapper:
+
+```pml
+!newCopy = !!copyCeWithMode(!!ce, !!ce.owner, 'typecopy', 'TYPEPREFIX', 'Copy TYPEPREFIX')
+```
+
+Доступные режимы:
+
+```text
+DEFAULT     /copyof-PipeName
+TYPEPREFIX  /typecopy-PIPE-PipeName
+PIPEBRANCH  /pbcopy-P-PipeName or /pbcopy-B-BranchName
+LOWER       /lowercopy-pipename
+```
+
+Смысл режимов:
+
+- `DEFAULT` - универсальный режим. К имени добавляется только выбранный префикс, например `copyof-` или `clone-`. Подходит для обычной копии без дополнительной классификации.
+- `TYPEPREFIX` - добавляет тип элемента после префикса: `PIPE`, `BRAN`, `EQUI` и т.д. Это удобно, когда в одной копируемой структуре есть разные типы элементов и их нужно различать уже по имени.
+- `PIPEBRANCH` - специальный короткий режим для трубопроводов: `PIPE` получает метку `P-`, `BRAN` получает `B-`, остальные типы именуются как в `TYPEPREFIX`. Это уменьшает длину имени и оставляет понятную маркировку pipe/branch.
+- `LOWER` - приводит итоговое имя к нижнему регистру. Используется, если в проекте принята lowercase-схема именования или нужно убрать смешанный регистр из копий.
+
+## Примеры режимов
 
 ### DEFAULT
 
 ```pml
 !copy = object COPYCE(!!ce, !!ce.owner, 'copyof', 'Copy DEFAULT', 'DEFAULT')
 !newCopy = !copy.run()
-```
-
-Example names:
-
-```text
-/copyof-PipeName
-/copyof-BranchName
 ```
 
 ### TYPEPREFIX
@@ -41,26 +137,11 @@ Example names:
 !newCopy = !copy.run()
 ```
 
-Example names:
-
-```text
-/typecopy-PIPE-PipeName
-/typecopy-BRAN-BranchName
-```
-
 ### PIPEBRANCH
 
 ```pml
 !copy = object COPYCE(!!ce, !!ce.owner, 'pbcopy', 'Copy PIPEBRANCH', 'PIPEBRANCH')
 !newCopy = !copy.run()
-```
-
-Example names:
-
-```text
-/pbcopy-P-PipeName
-/pbcopy-B-BranchName
-/pbcopy-EQUI-EquipmentName
 ```
 
 ### LOWER
@@ -70,48 +151,15 @@ Example names:
 !newCopy = !copy.run()
 ```
 
-Example names:
+## Тест
 
-```text
-/lowercopy-pipename
-/lowercopy-branchname
-```
-
-## Function wrappers
-
-One-shot default copy:
-
-```pml
-!newCopy = !!copyCeWithCopyofNames(!!ce, !!ce.owner)
-```
-
-One-shot custom prefix:
-
-```pml
-!newCopy = !!copyCeWithPrefixRoot(!!ce, !!ce.owner, 'clone')
-```
-
-One-shot custom prefix and undo mark:
-
-```pml
-!newCopy = !!copyCeWithPrefixRootMark(!!ce, !!ce.owner, 'clone', 'Clone current CE')
-```
-
-One-shot custom mode:
-
-```pml
-!newCopy = !!copyCeWithMode(!!ce, !!ce.owner, 'typecopy', 'TYPEPREFIX', 'Test TYPEPREFIX')
-```
-
-## Test script
-
-Run this on a safe test element:
+Запускать только на безопасном тестовом элементе:
 
 ```pml
 !created = !!copyCeTestCurrent()
 ```
 
-It creates four copies of current `CE` under `CE.owner`:
+Тест создает четыре копии текущего `CE` под `CE.owner`:
 
 ```text
 DEFAULT
@@ -120,59 +168,41 @@ PIPEBRANCH
 LOWER
 ```
 
-Each copy creates its own `MARKDB` undo mark.
-
-Undo examples:
+Откат:
 
 ```pml
 UNDODB
 UNDODB 4
 ```
 
-## PostEvents test
+## PostEvents
 
-Install optional undo/redo callbacks:
+Опциональные callbacks для undo/redo:
 
 ```pml
 !ok = !!copyCeInstallPostEvents()
 ```
 
-Disable callback output without removing the global object:
+Отключить вывод callbacks:
 
 ```pml
 !ok = !!copyCePostEventsEnabled(FALSE)
 ```
 
-Enable again:
+Включить снова:
 
 ```pml
 !ok = !!copyCePostEventsEnabled(TRUE)
 ```
 
-## Flow
-
-```mermaid
-flowchart TD
-    A["Caller: function wrapper or COPYCE object"] --> B["COPYCE.run()"]
-    B --> C["collectTree(source)"]
-    C --> D["findFreePrefix(sourceElements)"]
-    D --> E["customName(element, prefix)"]
-    E --> F{"name exists?"}
-    F -- "yes" --> D
-    F -- "no for all" --> G["MARKDB markText"]
-    G --> H["createRawCopy()"]
-    H --> I["renameTree(copyRoot, prefix)"]
-    I --> J["return copyRoot"]
-```
-
-## Files
+## Файлы
 
 ```text
-copyce.pmlobj                     main COPYCE object
+copyce.pmlobj                     основной объект COPYCE
 copycepostevents.pmlobj           optional !!postEvents object
-copyCeTestCurrent.pmlfnc          test runner
-copyCeWithMode.pmlfnc             one-shot mode wrapper
-copyCeWithCopyofNames.pmlfnc      old default wrapper
-copyCeWithPrefixRoot.pmlfnc       custom prefix wrapper
-copyCeWithPrefixRootMark.pmlfnc   custom prefix + mark wrapper
+copyCeTestCurrent.pmlfnc          тестовый запуск
+copyCeWithMode.pmlfnc             wrapper для режима именования
+copyCeWithCopyofNames.pmlfnc      простая копия copyof
+copyCeWithPrefixRoot.pmlfnc       копия со своим префиксом
+copyCeWithPrefixRootMark.pmlfnc   копия со своим префиксом и MARKDB-текстом
 ```
