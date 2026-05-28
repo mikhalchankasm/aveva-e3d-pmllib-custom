@@ -5,7 +5,7 @@
 Main file:
 
 ```text
-pmllib\mylib\design\copyfunc\copyce.pmlobj
+pmllib\e3dctools\design\copyfunc\copyce.pmlobj
 ```
 
 ## Object Usage

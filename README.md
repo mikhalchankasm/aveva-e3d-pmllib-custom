@@ -12,7 +12,7 @@ This repository is not affiliated with, endorsed by, or supported by AVEVA. It c
 
 ```text
 pmllib/
-  mylib/
+  e3dctools/
     design/
       <module>/
         *.pmlobj
@@ -39,6 +39,12 @@ Install the repository `pmllib` content into a local E3D PMLLIB path:
 .\scripts\install-local.ps1 -E3DVersion "Everything3D2.10"
 ```
 
+By default this installs into a product folder named `e3dctools`. To install into a different local folder, for example an existing test `mylib`, use:
+
+```powershell
+.\scripts\install-local.ps1 -E3DVersion "Everything3D2.10" -LibraryName "mylib"
+```
+
 See [docs/install.md](docs/install.md) for installation notes.
 
 ## Optional .NET Tools
@@ -46,7 +52,7 @@ See [docs/install.md](docs/install.md) for installation notes.
 For helpers that need more complex logic than PML can comfortably maintain, use a paired PML + C# structure:
 
 ```text
-pmllib/mylib/design/<module>/
+pmllib/e3dctools/design/<module>/
   <toolWrapper>.pmlfnc
 src/dotnet/<tool-project>/
   *.cs
@@ -83,14 +89,14 @@ Human-controlled database element copy helper. It creates a copy, applies config
 Files:
 
 ```text
-pmllib/mylib/design/copyfunc/
+pmllib/e3dctools/design/copyfunc/
 src/dotnet/AvevaE3D.CustomTools/
 ```
 
 Documentation:
 
-- [Russian README](pmllib/mylib/design/copyfunc/README.md)
-- [English README](pmllib/mylib/design/copyfunc/README.en.md)
+- [Russian README](pmllib/e3dctools/design/copyfunc/README.md)
+- [English README](pmllib/e3dctools/design/copyfunc/README.en.md)
 - [Technical notes](docs/copyce.md)
 
 Quick example:
@@ -103,7 +109,7 @@ Quick example:
 
 For each new helper, prefer this pattern:
 
-- Put the implementation under `pmllib/mylib/design/<module>/`.
+- Put the implementation under `pmllib/e3dctools/design/<module>/`.
 - Add a local `README.md` near the PML files.
 - Add a small safe example under `examples/` when possible.
 - Document expected inputs, outputs, side effects, and undo behavior.

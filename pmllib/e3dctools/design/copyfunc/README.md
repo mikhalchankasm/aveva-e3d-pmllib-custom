@@ -9,7 +9,7 @@
 ## Где лежит
 
 ```text
-pmllib\mylib\design\copyfunc
+pmllib\e3dctools\design\copyfunc
 ```
 
 Основной объект:

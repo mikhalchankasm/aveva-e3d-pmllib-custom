@@ -21,7 +21,7 @@ PML wrapper -> custom C# tool -> result returned to PML or applied through an ag
 
 ```text
 pmllib/
-  mylib/
+  e3dctools/
     design/
       copyfunc/
         copyCeNet.pmlfnc
@@ -112,7 +112,7 @@ The current `COPYCE` helper is implemented in PML. A DLL-backed layer has starte
 The first PMLNet wrapper is:
 
 ```text
-pmllib/mylib/design/copyfunc/copyCeNetBuildName.pmlfnc
+pmllib/e3dctools/design/copyfunc/copyCeNetBuildName.pmlfnc
 ```
 
 It calls the C# naming logic only. A future entrypoint, for example `copyCeNet.pmlfnc`, can perform more of the actual copy workflow after undo/transaction behavior is confirmed in E3D 2.10.

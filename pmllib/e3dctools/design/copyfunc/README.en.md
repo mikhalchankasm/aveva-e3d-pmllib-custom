@@ -9,7 +9,7 @@ The idea is simple: the native `NEW ... COPY ...` command makes a technical copy
 ## Location
 
 ```text
-pmllib\mylib\design\copyfunc
+pmllib\e3dctools\design\copyfunc
 ```
 
 Main object:

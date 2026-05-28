@@ -11,7 +11,7 @@ From the repository root:
 Default target:
 
 ```text
-C:\Program Files (x86)\AVEVA\Everything3D2.10\PMLLIB
+C:\Program Files (x86)\AVEVA\Everything3D2.10\PMLLIB\e3dctools
 ```
 
 Custom target:
@@ -20,20 +20,34 @@ Custom target:
 .\scripts\install-local.ps1 -PmlLibRoot "D:\AVEVA\PMLLIB"
 ```
 
-The script copies `pmllib\mylib` into the target PMLLIB root.
+Custom PMLLIB folder name:
+
+```powershell
+.\scripts\install-local.ps1 -PmlLibRoot "D:\AVEVA\PMLLIB" -LibraryName "mycompanytools"
+```
+
+Legacy local sandbox example:
+
+```powershell
+.\scripts\install-local.ps1 -E3DVersion "Everything3D2.10" -LibraryName "mylib"
+```
+
+The script copies `pmllib\e3dctools` into the selected folder under the target PMLLIB root.
+
+`mylib` is intentionally not used as the public default because many users already have local test folders with that name. This repository uses `e3dctools` as its product-style PMLLIB folder.
 
 ## Option 2: Manual copy
 
 Copy:
 
 ```text
-pmllib\mylib
+pmllib\e3dctools
 ```
 
 To:
 
 ```text
-C:\Program Files (x86)\AVEVA\Everything3D2.10\PMLLIB\mylib
+C:\Program Files (x86)\AVEVA\Everything3D2.10\PMLLIB\e3dctools
 ```
 
 ## Verify
